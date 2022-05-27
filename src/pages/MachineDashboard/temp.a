@@ -51,14 +51,14 @@ interface IProps
   cluster?: any;
 }
 
-let pollingTimer: any;
-
 function MachineDashboard(props: IProps) {
 
   const { asyncGetMemorySizeStat, asyncGetDiskSizeStat, cluster, metricsFilterValues,
     asyncUpdateBaseLine, asyncGetCPUStatByRange, asyncGetMemoryStatByRange, asyncGetDiskStatByRange,
     asyncGetLoadByRange, asyncGetNetworkStatByRange, updateMetricsFiltervalues, instanceList
    } = props;
+
+  let pollingTimer: any;
 
   const [editPanelType, setEditPanelType] = useState<string>('');
 
@@ -75,7 +75,7 @@ function MachineDashboard(props: IProps) {
         clearTimeout(pollingTimer);
       }
     }
-  }, [metricsFilterValues, cluster])
+  }, [])
 
   useEffect(() => {
     if (pollingTimer) {

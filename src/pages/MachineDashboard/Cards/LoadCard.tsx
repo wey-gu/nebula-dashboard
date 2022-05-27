@@ -18,7 +18,7 @@ const mapState = (state: IRootState) => {
       aliasConfig,
     }),
     valueType: VALUE_TYPE.number,
-    loading: !!state.loading.effects.machine.asyncGetLoadByRange,
+    loading: false,
   };
 };
 

@@ -9,6 +9,7 @@ const mapState = (state: IRootState) => {
   const { cpuStat } = state.machine;
   const { cpuBaseLine } = state.setting;
   const { aliasConfig } = state.app;
+
   return {
     baseLine: cpuBaseLine,
     data: getDataByType({
@@ -18,7 +19,7 @@ const mapState = (state: IRootState) => {
       aliasConfig,
     }),
     valueType: VALUE_TYPE.percentage,
-    loading: !!state.loading.effects.machine.asyncGetCPUStatByRange,
+    loading: false,
   };
 };
 export default connect(mapState)(LineCard);

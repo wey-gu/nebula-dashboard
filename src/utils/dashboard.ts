@@ -181,33 +181,43 @@ export const getProperTickInterval = period => {
   }
 };
 
+export enum TIME_OPTION_TYPE {
+  HOUR1 = '1hour',
+  HOUR6 = '6hour',
+  HOUR12 = '12hour',
+  DAY1 = '1day',
+  DAY3 = '3day',
+  DAY7  = '7day',
+  DAY14 = '14day',
+}
+
 export const TIMEOPTIONS = [
   {
-    name: '1hour',
+    name: TIME_OPTION_TYPE.HOUR1,
     value: 60 * 60 * 1000,
   },
   {
-    name: '6hour',
+    name: TIME_OPTION_TYPE.HOUR6,
     value: 60 * 60 * 6 * 1000,
   },
   {
-    name: '12hour',
+    name: TIME_OPTION_TYPE.HOUR12,
     value: 60 * 60 * 12 * 1000,
   },
   {
-    name: '1day',
+    name: TIME_OPTION_TYPE.DAY1,
     value: 60 * 60 * 24 * 1000,
   },
   {
-    name: '3day',
+    name: TIME_OPTION_TYPE.DAY3,
     value: 60 * 60 * 24 * 3 * 1000,
   },
   {
-    name: '7day',
+    name: TIME_OPTION_TYPE.DAY7,
     value: 60 * 60 * 24 * 7 * 1000,
   },
   {
-    name: '14day',
+    name: TIME_OPTION_TYPE.DAY14,
     value: 60 * 60 * 24 * 14 * 1000,
   },
 ];
@@ -231,6 +241,17 @@ export const NEED_ADD_SUM_QUERYS = [
   'num_queries',
   'num_slow_queries',
 ];
+
+export const calcTimeRange = (timeRange: TIME_OPTION_TYPE | [number, number]): [number, number] => {
+  const end = Date.now();
+  if (typeof timeRange === 'string') {
+    const value = TIMEOPTIONS.find(t => t.name === timeRange)?.value!;
+    return [end - value, end];
+  } else if ( typeof timeRange === 'object' && timeRange.length === 2) {
+    return timeRange;
+  }
+  throw new Error('timeRange is not valid');
+}
 
 export enum MACHINE_TYPE {
   cpu = 'cpu',

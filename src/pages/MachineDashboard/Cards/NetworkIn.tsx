@@ -18,7 +18,7 @@ const mapState = (state: IRootState) => {
       aliasConfig,
     }),
     valueType: VALUE_TYPE.byteSecondNet,
-    loading: !!state.loading.effects.machine.asyncGetNetworkStatByRange,
+    loading: false,
   };
 };
 

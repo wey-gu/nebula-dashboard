@@ -7,7 +7,6 @@ import SpaceChart from '@/components/Charts/SpaceChart';
 const mapState = (state: IRootState) => {
   const { diskSizeStat, diskStat } = state.machine;
   const { aliasConfig } = state.app;
-
   return {
     // According to type, only the detail increases total
     diskUsageDetail: diskStat

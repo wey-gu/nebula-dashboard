@@ -85,7 +85,7 @@ class ServicePanel extends React.Component<IProps> {
     } = this.props;
     if (serviceType) {
       const metricsList = serviceMetric[`${serviceType}d`];
-      console.log('metricsList', metricsList);
+      // console.log('metricsList', metricsList);
       const timeRange = getDefaultTimeRange();
       const defaultFormParams = {
         interval: DETAIL_DEFAULT_RANGE,

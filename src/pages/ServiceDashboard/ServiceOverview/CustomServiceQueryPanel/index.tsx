@@ -12,15 +12,17 @@ import {
 } from '@/utils/service';
 import Card from '@/components/Service/ServiceCard/Card';
 import { IDispatch, IRootState } from '@/store';
+import { isEnterpriseVersion } from '@/utils';
 
 import './index.less';
 
 const mapDispatch = (dispatch: IDispatch) => ({
-  asyncGetMetricsData: dispatch.service.asyncGetMetricsData,
+  asyncGetMetricsData: dispatch.service.asyncGetMetricsData as any,
 });
 
 const mapState = (state: IRootState) => ({
   aliasConfig: state.app.aliasConfig,
+  cluster: (state as any).cluster.cluster,
 });
 
 interface IProps
@@ -34,6 +36,9 @@ interface IProps
 interface IState {
   data: IStatRangeItem[];
 }
+
+const shouldCheckCluster = isEnterpriseVersion();
+
 class CustomServiceQueryPanel extends React.Component<IProps, IState> {
   pollingTimer: any;
 
@@ -45,7 +50,14 @@ class CustomServiceQueryPanel extends React.Component<IProps, IState> {
   }
 
   componentDidMount() {
-    this.pollingData();
+    if (shouldCheckCluster) {
+      const { cluster } = this.props;
+      if (cluster.id) {
+        this.pollingData();
+      }
+    } else {
+      this.pollingData();
+    }
   }
 
   componentWillUnmount() {
@@ -55,8 +67,15 @@ class CustomServiceQueryPanel extends React.Component<IProps, IState> {
   }
 
   componentDidUpdate(prevProps) {
-    if (!isEqual(prevProps.config, this.props.config)) {
-      this.resetPollingData();
+    if (shouldCheckCluster) {
+      const { cluster } = this.props;
+      if (cluster.name !== prevProps.cluster.name) {
+        this.resetPollingData();
+      }
+    } else {
+      if (!isEqual(prevProps.config, this.props.config)) {
+        this.resetPollingData();
+      }
     }
   }
 
@@ -68,13 +87,15 @@ class CustomServiceQueryPanel extends React.Component<IProps, IState> {
   };
 
   getMetricsData = async () => {
-    const { config } = this.props;
-    const { period: metricPeriod, metricFunction } = config;
+    const { config, cluster } = this.props;
+    const { period: metricPeriod, metricFunction, space } = config;
     const end = Date.now();
     const data = await this.props.asyncGetMetricsData({
       query: metricFunction + metricPeriod, // EXPLAIN: query like nebula_graphd_num_queries_rate_600
       start: end - SERVICE_DEFAULT_RANGE,
       end,
+      space,
+      clusterID: cluster?.id
     });
     this.setState({
       data,

@@ -18,9 +18,7 @@ const mapState = (state: IRootState) => {
     sizes: memorySizeStat,
     baseLine: memoryBaseLine,
     valueType: VALUE_TYPE.percentage,
-    loading:
-      !!state.loading.effects.machine.asyncGetMemorySizeStat &&
-      !!state.loading.effects.machine.asyncGetMemoryStatByRange,
+    loading:false,
   };
 };
 
