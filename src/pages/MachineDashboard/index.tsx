@@ -188,7 +188,7 @@ function MachineDashboard(props: IProps) {
             viewPath="/machine/cpu"
             onConfigPanel={() => handleConfigPanel(MACHINE_TYPE.cpu)}
           >
-            <CPUCard />
+            <CPUCard/>
           </DashboardCard>
         </Col>
         <Col span={12}>

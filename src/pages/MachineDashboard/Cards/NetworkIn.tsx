@@ -6,14 +6,14 @@ import { getDataByType } from '@/utils/dashboard';
 import { VALUE_TYPE } from '@/utils/promQL';
 
 const mapState = (state: IRootState) => {
-  const { networkInStat } = state.machine;
+  const { networkInStat, metricsFilterValues } = state.machine;
   const { networkInBaseLine } = state.setting;
   const { aliasConfig } = state.app;
   return {
     baseLine: networkInBaseLine,
     data: getDataByType({
       data: networkInStat,
-      type: 'all',
+      type: metricsFilterValues.instanceList,
       name: 'instance',
       aliasConfig,
     }),

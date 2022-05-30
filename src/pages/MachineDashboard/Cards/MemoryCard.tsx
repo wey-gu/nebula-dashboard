@@ -5,13 +5,13 @@ import { getDataByType } from '@/utils/dashboard';
 import { VALUE_TYPE } from '@/utils/promQL';
 
 const mapState = (state: IRootState) => {
-  const { memoryStat, memorySizeStat } = state.machine;
+  const { memoryStat, memorySizeStat, metricsFilterValues } = state.machine;
   const { memoryBaseLine } = state.setting;
   const { aliasConfig } = state.app;
   return {
     data: getDataByType({
       data: memoryStat,
-      type: 'all',
+      type: metricsFilterValues.instanceList,
       name: 'instance',
       aliasConfig,
     }),

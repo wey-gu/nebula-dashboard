@@ -59,6 +59,13 @@ const MetricsFilterPanel = (props: IProps) => {
     onChange?.(form.getFieldsValue());
   }
 
+  const handleInstanceChange = (value)=> {
+    form.setFieldsValue({
+      instances: value,
+    });
+    onChange?.(form.getFieldsValue());
+  }
+
   return (
     <Form
       className={styles.metricsFilterPanel}
@@ -91,9 +98,10 @@ const MetricsFilterPanel = (props: IProps) => {
         // span: 22,
       }} name="instanceList" label={intl.get('common.metricLabel')}>
         <TreeSelect 
-          style={{ minWidth: '200px', maxWidth: '300px' }} 
+          style={{ minWidth: '250px', maxWidth: '350px' }} 
           treeData={treeData} treeCheckable
           showCheckedStrategy={TreeSelect.SHOW_PARENT}
+          onChange={handleInstanceChange}
         />
       </Form.Item>
       {/* <Button onClick={handleConfirm} type="primary" className={`${styles.primaryBtn} ${styles.confirmBtn}`}>{intl.get('common.confirm')}</Button> */}

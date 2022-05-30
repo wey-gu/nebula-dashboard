@@ -6,7 +6,7 @@ import { getDataByType } from '@/utils/dashboard';
 import { VALUE_TYPE } from '@/utils/promQL';
 
 const mapState = (state: IRootState) => {
-  const { cpuStat } = state.machine;
+  const { cpuStat, metricsFilterValues } = state.machine;
   const { cpuBaseLine } = state.setting;
   const { aliasConfig } = state.app;
 
@@ -14,7 +14,7 @@ const mapState = (state: IRootState) => {
     baseLine: cpuBaseLine,
     data: getDataByType({
       data: cpuStat,
-      type: 'all',
+      type: metricsFilterValues.instanceList,
       name: 'instance',
       aliasConfig,
     }),

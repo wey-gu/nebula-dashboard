@@ -6,14 +6,14 @@ import LineCard from '@/components/DashboardCard/LineCard';
 import { getDataByType } from '@/utils/dashboard';
 
 const mapState = (state: IRootState) => {
-  const { networkOutStat } = state.machine;
+  const { networkOutStat, metricsFilterValues } = state.machine;
   const { networkOutBaseLine } = state.setting;
   const { aliasConfig } = state.app;
   return {
     baseLine: networkOutBaseLine,
     data: getDataByType({
       data: networkOutStat,
-      type: 'all',
+      type: metricsFilterValues.instanceList,
       name: 'instance',
       aliasConfig,
     }),
