@@ -14,6 +14,7 @@ import './index.less';
 
 const mapDispatch: any = (dispatch: IDispatch) => ({
   asyncGetStatus: dispatch.service.asyncGetStatus,
+  updateMetricsFiltervalues: dispatch.machine.updateMetricsFiltervalues,
   updatePanelConfig: values =>
     dispatch.service.update({
       panelConfig: values,
@@ -70,6 +71,11 @@ class ServiceDashboard extends React.Component<IProps, IState> {
     this.props.history.push(`/service/${serviceType}-metrics`);
   };
 
+  handleMetricsChange = (values) => {
+    const { updateMetricsFiltervalues } = this.props;
+    updateMetricsFiltervalues(values);
+  }
+
   render() {
     const { editPanelType, editPanelIndex } = this.state;
     const { panelConfig, serviceMetric, updatePanelConfig, asyncGetStatus, onView, instanceList } =
@@ -80,7 +86,7 @@ class ServiceDashboard extends React.Component<IProps, IState> {
       <>
         <div className="service-table">
           <div className='common-header' >
-            <MetricsFilterPanel instanceList={instanceList} />
+            <MetricsFilterPanel onChange={this.handleMetricsChange} instanceList={instanceList} />
           </div>
           {METRIC_SERVICE_TYPES.map(type => (
             <ServiceOverview

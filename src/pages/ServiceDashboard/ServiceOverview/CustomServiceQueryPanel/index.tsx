@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
-import { isEqual } from 'lodash';
 import { Popover } from 'antd';
 import Icon from '@/components/Icon';
 import { IServicePanelConfig, IStatRangeItem } from '@/utils/interface';
@@ -16,13 +15,14 @@ import { isEnterpriseVersion } from '@/utils';
 
 import './index.less';
 
-const mapDispatch = (dispatch: IDispatch) => ({
+const mapDispatch: any = (dispatch: IDispatch) => ({
   asyncGetMetricsData: dispatch.service.asyncGetMetricsData as any,
 });
 
 const mapState = (state: IRootState) => ({
   aliasConfig: state.app.aliasConfig,
-  cluster: (state as any).cluster.cluster,
+  cluster: (state as any).cluster?.cluster,
+  metricsFilterValues: state.machine.metricsFilterValues,
 });
 
 interface IProps
@@ -33,128 +33,118 @@ interface IProps
   aliasConfig: any;
 }
 
-interface IState {
-  data: IStatRangeItem[];
-}
-
 const shouldCheckCluster = isEnterpriseVersion();
 
-class CustomServiceQueryPanel extends React.Component<IProps, IState> {
-  pollingTimer: any;
+let pollingTimer: any;
 
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      data: [],
-    };
-  }
+function CustomServiceQueryPanel(props: IProps) {
 
-  componentDidMount() {
+  const { config, cluster, asyncGetMetricsData, onConfigPanel, aliasConfig, metricsFilterValues } = props;
+
+  const [ data, setData ] = useState<any[]>([])
+
+  useEffect(() => {
     if (shouldCheckCluster) {
-      const { cluster } = this.props;
       if (cluster.id) {
-        this.pollingData();
+        pollingData();
       }
     } else {
-      this.pollingData();
+      pollingData();
     }
-  }
-
-  componentWillUnmount() {
-    if (this.pollingTimer) {
-      clearTimeout(this.pollingTimer);
+    return () => {
+      if (pollingTimer) {
+        clearTimeout(pollingTimer);
+      }
     }
-  }
+  }, [])
 
-  componentDidUpdate(prevProps) {
+  useEffect(() => {
+    if (pollingTimer) {
+      clearTimeout(pollingTimer);
+    }
+    pollingData();
+  }, [metricsFilterValues.frequency])
+
+  useEffect(() => {
     if (shouldCheckCluster) {
-      const { cluster } = this.props;
-      if (cluster.name !== prevProps.cluster.name) {
-        this.resetPollingData();
+      if (cluster.id) {
+        resetPollingData();
       }
     } else {
-      if (!isEqual(prevProps.config, this.props.config)) {
-        this.resetPollingData();
-      }
+      resetPollingData()
     }
-  }
+  }, [cluster, config])
 
-  resetPollingData = () => {
-    if (this.pollingTimer) {
-      clearTimeout(this.pollingTimer);
+  const resetPollingData = () => {
+    if (pollingTimer) {
+      clearTimeout(pollingTimer);
     }
-    this.pollingData();
+    pollingData();
   };
 
-  getMetricsData = async () => {
-    const { config, cluster } = this.props;
+  const getMetricsData = async () => {
     const { period: metricPeriod, metricFunction, space } = config;
     const end = Date.now();
-    const data = await this.props.asyncGetMetricsData({
+    const data = await asyncGetMetricsData({
       query: metricFunction + metricPeriod, // EXPLAIN: query like nebula_graphd_num_queries_rate_600
       start: end - SERVICE_DEFAULT_RANGE,
       end,
       space,
       clusterID: cluster?.id
     });
-    this.setState({
-      data,
-    });
+    setData(data)
   };
 
-  pollingData = () => {
-    this.getMetricsData();
-    this.pollingTimer = setTimeout(this.pollingData, SERVICE_POLLING_INTERVAL);
+  const pollingData = () => {
+    console.log('polling data', metricsFilterValues.frequency);
+
+    getMetricsData();
+    if (metricsFilterValues.frequency > 0) {
+      pollingTimer = setTimeout(pollingData, metricsFilterValues.frequency);
+    }
   };
 
-  render() {
-    const { data } = this.state;
-    const {
-      config: { metric, period, metricType, baseLine },
-      aliasConfig,
-    } = this.props;
-    return (
-      <div className="service-card">
-        <div className="header">
-          <Popover
-            placement="bottomLeft"
-            content={intl.get(`metric_description.${metric}`)}
+  return (
+    <div className="service-card">
+      <div className="header">
+        <Popover
+          placement="bottomLeft"
+          content={intl.get(`metric_description.${config.metric}`)}
+        >
+          {config.metric}
+        </Popover>
+        <div>
+          <span>
+            {intl.get('service.period')}: <span>{config.period}</span>
+          </span>
+          <span>
+            {intl.get('service.metricParams')}: <span>{config.metricType}</span>
+          </span>
+          <div
+            className="btn-icon-with-desc blue"
+            onClick={onConfigPanel}
           >
-            {metric}
-          </Popover>
-          <div>
-            <span>
-              {intl.get('service.period')}: <span>{period}</span>
-            </span>
-            <span>
-              {intl.get('service.metricParams')}: <span>{metricType}</span>
-            </span>
-            <div
-              className="btn-icon-with-desc blue"
-              onClick={this.props.onConfigPanel}
-            >
-              <Icon icon="#iconSetup" />
-              <span>{intl.get('common.set')}</span>
-            </div>
+            <Icon icon="#iconSetup" />
+            <span>{intl.get('common.set')}</span>
           </div>
         </div>
-        <div className="content">
-          {data.length > 0 && (
-            <Card
-              baseLine={baseLine}
-              data={getDataByType({
-                data,
-                type: 'all',
-                name: 'instanceName',
-                aliasConfig,
-              })}
-              loading={false}
-            />
-          )}
-        </div>
       </div>
-    );
-  }
+      <div className="content">
+        {data.length > 0 && (
+          <Card
+            baseLine={config.baseLine}
+            data={getDataByType({
+              data,
+              type: 'all',
+              name: 'instanceName',
+              aliasConfig,
+            })}
+            loading={false}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default connect(mapState, mapDispatch)(CustomServiceQueryPanel);

@@ -10,7 +10,7 @@ import { isEnterpriseVersion } from '@/utils';
 import './index.less';
 
 const mapState = (state: any) => ({
-  cluster: state.cluster.cluster,
+  cluster: state.cluster?.cluster,
 });
 
 const mapDispatch = (dispatch) => ({});
