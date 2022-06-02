@@ -70,7 +70,7 @@ export function ModelWrapper(serviceApi) {
         end: number;
         clusterID?: string;
         noSuffix?: boolean;
-      }) {
+      }, rootState) {
         const {
           start,
           space,
@@ -96,9 +96,10 @@ export function ModelWrapper(serviceApi) {
         if (code === 0 && data.result.length !== 0) {
           stat = data.result;
         }
-        const instanceList = stat.map(item => item.metric.instance);
+        const list = stat.map(item => item.metric.instanceName);
+        // rootState.service.instanceList.concat()
         this.update({
-          instanceList: unique(instanceList)
+          instanceList: unique(list),
         })
         return stat;
       },

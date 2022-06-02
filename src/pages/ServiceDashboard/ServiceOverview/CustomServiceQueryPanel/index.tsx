@@ -3,11 +3,10 @@ import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { Popover } from 'antd';
 import Icon from '@/components/Icon';
-import { IServicePanelConfig, IStatRangeItem } from '@/utils/interface';
-import { getDataByType } from '@/utils/dashboard';
+import { IServicePanelConfig } from '@/utils/interface';
+import { calcTimeRange, getDataByType } from '@/utils/dashboard';
 import {
   SERVICE_DEFAULT_RANGE,
-  SERVICE_POLLING_INTERVAL,
 } from '@/utils/service';
 import Card from '@/components/Service/ServiceCard/Card';
 import { IDispatch, IRootState } from '@/store';
@@ -44,6 +43,9 @@ function CustomServiceQueryPanel(props: IProps) {
   const [ data, setData ] = useState<any[]>([])
 
   useEffect(() => {
+    if (pollingTimer) {
+      clearTimeout(pollingTimer);
+    }
     if (shouldCheckCluster) {
       if (cluster.id) {
         pollingData();
@@ -56,7 +58,7 @@ function CustomServiceQueryPanel(props: IProps) {
         clearTimeout(pollingTimer);
       }
     }
-  }, [])
+  }, [metricsFilterValues, cluster, config])
 
   useEffect(() => {
     if (pollingTimer) {
@@ -65,29 +67,12 @@ function CustomServiceQueryPanel(props: IProps) {
     pollingData();
   }, [metricsFilterValues.frequency])
 
-  useEffect(() => {
-    if (shouldCheckCluster) {
-      if (cluster.id) {
-        resetPollingData();
-      }
-    } else {
-      resetPollingData()
-    }
-  }, [cluster, config])
-
-  const resetPollingData = () => {
-    if (pollingTimer) {
-      clearTimeout(pollingTimer);
-    }
-    pollingData();
-  };
-
   const getMetricsData = async () => {
     const { period: metricPeriod, metricFunction, space } = config;
-    const end = Date.now();
+    const [ start, end ] = calcTimeRange(metricsFilterValues.timeRange);
     const data = await asyncGetMetricsData({
       query: metricFunction + metricPeriod, // EXPLAIN: query like nebula_graphd_num_queries_rate_600
-      start: end - SERVICE_DEFAULT_RANGE,
+      start,
       end,
       space,
       clusterID: cluster?.id
@@ -96,11 +81,9 @@ function CustomServiceQueryPanel(props: IProps) {
   };
 
   const pollingData = () => {
-    console.log('polling data', metricsFilterValues.frequency);
-
     getMetricsData();
     if (metricsFilterValues.frequency > 0) {
-      pollingTimer = setTimeout(pollingData, metricsFilterValues.frequency);
+      pollingTimer = setTimeout(getMetricsData, metricsFilterValues.frequency);
     }
   };
 
@@ -135,7 +118,7 @@ function CustomServiceQueryPanel(props: IProps) {
             baseLine={config.baseLine}
             data={getDataByType({
               data,
-              type: 'all',
+              type: metricsFilterValues.instanceList,
               name: 'instanceName',
               aliasConfig,
             })}

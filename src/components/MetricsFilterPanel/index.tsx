@@ -98,7 +98,7 @@ const MetricsFilterPanel = (props: IProps) => {
         // span: 22,
       }} name="instanceList" label={intl.get('common.metricLabel')}>
         <TreeSelect 
-          style={{ minWidth: '250px', maxWidth: '350px' }} 
+          style={{ minWidth: '250px', maxWidth: '500px' }} 
           treeData={treeData} treeCheckable
           showCheckedStrategy={TreeSelect.SHOW_PARENT}
           onChange={handleInstanceChange}
