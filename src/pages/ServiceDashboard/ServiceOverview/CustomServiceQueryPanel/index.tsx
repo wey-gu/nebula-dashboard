@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import intl from 'react-intl-universal';
 import { connect } from 'react-redux';
 import { Popover } from 'antd';
 import Icon from '@/components/Icon';
 import { IServicePanelConfig } from '@/utils/interface';
 import { calcTimeRange, getDataByType } from '@/utils/dashboard';
-import {
-  SERVICE_DEFAULT_RANGE,
-} from '@/utils/service';
+// import {
+//   SERVICE_DEFAULT_RANGE,
+// } from '@/utils/service';
 import Card from '@/components/Service/ServiceCard/Card';
 import { IDispatch, IRootState } from '@/store';
 import { isEnterpriseVersion } from '@/utils';
@@ -34,13 +34,13 @@ interface IProps
 
 const shouldCheckCluster = isEnterpriseVersion();
 
-let pollingTimer: any;
-
 function CustomServiceQueryPanel(props: IProps) {
 
   const { config, cluster, asyncGetMetricsData, onConfigPanel, aliasConfig, metricsFilterValues } = props;
 
   const [ data, setData ] = useState<any[]>([])
+
+  let pollingTimer: any = useMemo(() => undefined, []);
 
   useEffect(() => {
     if (pollingTimer) {
@@ -58,14 +58,7 @@ function CustomServiceQueryPanel(props: IProps) {
         clearTimeout(pollingTimer);
       }
     }
-  }, [metricsFilterValues, cluster, config])
-
-  useEffect(() => {
-    if (pollingTimer) {
-      clearTimeout(pollingTimer);
-    }
-    pollingData();
-  }, [metricsFilterValues.frequency])
+  }, [metricsFilterValues.timeRange, , metricsFilterValues.frequency, cluster, config])
 
   const getMetricsData = async () => {
     const { period: metricPeriod, metricFunction, space } = config;
@@ -83,7 +76,9 @@ function CustomServiceQueryPanel(props: IProps) {
   const pollingData = () => {
     getMetricsData();
     if (metricsFilterValues.frequency > 0) {
-      pollingTimer = setTimeout(getMetricsData, metricsFilterValues.frequency);
+      pollingTimer = setTimeout(() => {
+        pollingData();
+      }, metricsFilterValues.frequency);
     }
   };
 

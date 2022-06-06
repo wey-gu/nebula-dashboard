@@ -157,7 +157,7 @@ export const getDataByType = (payload: {
   data.forEach(instance => {
     instance.values.forEach(([timstamps, value]) => {
       const _name = instance.metric[name];
-      if (((type?.includes('all') || type === 'all') && _name !== 'total') || _name === type || type?.includes(_name)) {
+      if (((type?.includes('all') || type === 'all') && _name !== 'total') || _name === type || (type as string[]).find(t => _name.includes(t))) {
         res.push({
           type: aliasConfig && aliasConfig[_name] ? aliasConfig[_name] : _name,
           value: Number(value),

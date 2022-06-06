@@ -68,21 +68,21 @@ function MachineDashboard(props: IProps) {
     asyncGetMemorySizeStat(cluster?.id);
     asyncGetDiskSizeStat(cluster?.id);
     getMachineStatus();
-    pollingMachineStatus();
+    // pollingMachineStatus();
 
     return () => {
       if (pollingTimer) {
         clearTimeout(pollingTimer);
       }
     }
-  }, [metricsFilterValues, cluster])
+  }, [cluster])
 
   useEffect(() => {
     if (pollingTimer) {
       clearTimeout(pollingTimer);
     }
     pollingMachineStatus();
-  }, [metricsFilterValues.frequency])
+  }, [metricsFilterValues.timeRange, metricsFilterValues.frequency])
 
   const handleConfigPanel = (editPanelType: string) => {
     setEditPanelType(editPanelType);
@@ -149,9 +149,9 @@ function MachineDashboard(props: IProps) {
   };
 
   const pollingMachineStatus = () => {
+    getMachineStatus();
     if (metricsFilterValues.frequency > 0) {
       pollingTimer = setTimeout(() => {
-        getMachineStatus();
         pollingMachineStatus();
       }, metricsFilterValues.frequency);
     }

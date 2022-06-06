@@ -28,6 +28,10 @@ export function ModelWrapper(serviceApi) {
         ...state,
         ...payload,
       }),
+      updateInstanceList: (state: IState, payload: any) => {
+        const instanceList = unique(state.instanceList.concat(payload));
+        return { ...state, instanceList };
+      },
     },
     effects: () => ({
       async asyncGetMetricsSumData(payload: {
@@ -70,7 +74,7 @@ export function ModelWrapper(serviceApi) {
         end: number;
         clusterID?: string;
         noSuffix?: boolean;
-      }, rootState) {
+      }) {
         const {
           start,
           space,
@@ -96,11 +100,11 @@ export function ModelWrapper(serviceApi) {
         if (code === 0 && data.result.length !== 0) {
           stat = data.result;
         }
-        const list = stat.map(item => item.metric.instanceName);
-        // rootState.service.instanceList.concat()
-        this.update({
-          instanceList: unique(list),
-        })
+        const list = stat.map(item => {
+          const instanceName = item.metric.instanceName;
+          return instanceName.slice(instanceName.lastIndexOf('-') + 1)
+        });
+        this.updateInstanceList(list)
         return stat;
       },
   

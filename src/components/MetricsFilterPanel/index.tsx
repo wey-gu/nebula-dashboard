@@ -60,6 +60,7 @@ const MetricsFilterPanel = (props: IProps) => {
   }
 
   const handleInstanceChange = (value)=> {
+    // console.log('zzzz', value);
     form.setFieldsValue({
       instances: value,
     });

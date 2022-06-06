@@ -47,6 +47,10 @@ export function MachineModelWrapper(service) {
         ...state,
         ...payload,
       }),
+      updateInstanceList: (state: IState, payload: any) => {
+        const instanceList = unique(state.instanceList.concat(payload));
+        return { ...state, instanceList };
+      },
     },
     effects: () => ({
       async asyncGetMetricsData(payload: {
@@ -80,9 +84,7 @@ export function MachineModelWrapper(service) {
           }
         }
         const instanceList = result.map(item => item.metric.instance).filter(instance => instance !== 'total');
-          this.update({
-            instanceList: unique(instanceList)
-          })
+        this.updateInstanceList(instanceList);
         return result;
       },
       async asyncGetCPUStatByRange(payload: {
